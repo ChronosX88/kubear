@@ -1,11 +1,15 @@
 gopher://{{data['ip']}}/
 Dirs:
-{% for dir in [f for f in self._host['data']['files'] if f['type'] == '1'] -%}
- + {{dir['path']}}
+{% for node in data['files'] -%}
+{% if node['type'] == '1' -%}
+ + {{node['path']}}
+{% endif -%}
 {% endfor -%}
 Other nodes:
-{% for file in [f for f in self._host['data']['files'] if f['type'] != '1' and f['type'] != 'i'] -%}
- + {{file['path']}}
-     {{file['name']}}
+{% for node in data['files'] -%}
+{% if node['type'] != '1' and node['type'] != 'i' -%}
+ + {{node['path']}}
+     {{node['name']}}
+{% endif -%}
 {% endfor -%}
 Geo: {{data['geo']['country']}}/{{data['geo']['city']}}
