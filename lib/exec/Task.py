@@ -8,18 +8,18 @@ class Task(Loadable):
     self._logger = Logger(self.__class__.__name__)
   
   def run(self, items):
-    result = []
-    try:
-      result = self._run(items)
-    except Exception as e:
-      self._logger.debug("Error occured while executing: %s", e)
+    result = self._run(items)
     return result
 
   def _run(self, items):
     for item in items:
-      item['steps'][self._id] = self._process(item)
+      try:
+        item['steps'][self._id] = self._process(item)
+      except Exception as e:
+        self._logger.debug("Error occured while executing: %s", e)
+        item['steps'][self._id] = False
     return items
-  
+
   def _process(self, item):
     return True
 

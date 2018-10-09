@@ -22,7 +22,8 @@ class RQExecutor(Executor):
   def __run(self):
     redis_conn = Redis(host=self.lcnf.get('redis').get('host'))
     jobs = []
-
+    known_sources = {}
+    
     while self._running:
       sleep(self.lcnf.get('delay', 0.5))
       try:
@@ -48,7 +49,13 @@ class RQExecutor(Executor):
             items = self._data.get(block=False, count=count, filter=filter)
             # obtain everything else from source
             if len(items) < count:
-              source = Loader.by_id('storage', pipeline.get('source'))
+              source = None
+              source_id = pipeline.get('source')
+              if source_id in known_sources:
+                source = known_sources[source_id]
+              else:
+                source = Loader.by_id('storage', source_id)
+                known_sources[source_id] = source
               new_items = source.get(block=False, count=(count - len(items)), filter=filter)
               items.extend(new_items)
               source.remove(new_items)

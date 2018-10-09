@@ -27,7 +27,7 @@ class GopherFindTask(Task): # pylint: disable=too-few-public-methods
     response = self._recv(sock)
     sock.close()
 
-    self._logger.debug("Parsing result")
+    self._logger.debug("Parsing result: %s", response)
     item['data']['files'] = []
     item['data']['filter'] = False
     for s in [s for s in response.split("\r\n") if s]:
@@ -43,4 +43,5 @@ class GopherFindTask(Task): # pylint: disable=too-few-public-methods
 
     if not item['data']['files']:
       raise Exception("Empty server (not Gopher?)")
-    item['steps'][self._id] = True
+
+    return True

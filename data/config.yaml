@@ -20,6 +20,7 @@ services:
     package: lib.exec.Executor
     service: RQExecutor
     storage: pool
+    delay: 2
     redis:
       host: redis
   GC:
@@ -165,7 +166,7 @@ tasks:
     service: FTPListFilesTask
   ftp_filter_files:
     package: lib.plugin.iscan.tasks.ftp
-    service: FTPListFilesTask
+    service: FTPFilterFilesTask
   ftp_apply_tpl:
     package: lib.plugin.base.tasks.text
     service: Jinja2TemplateTask
