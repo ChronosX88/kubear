@@ -3,23 +3,19 @@
 import subprocess
 import json
 from jsoncomment import JsonComment
-from lib import Logger
-import GeoIP
-from Config import cnf
 
-logger = Logger("common")
+from lib.exec import Task
 
-
-class MasScan:
-  def __init__(self, bin_path='/usr/bin/masscan', opts="-sS -Pn -n --wait 0 --max-rate 5000"):
-    self.bin_path = bin_path
-    self.opts_list = opts.split(' ')
-
-  def scan(self, ip_list, port_list):
+class MasScanTask(Task):
+  """Provides data.ports for each of items scanned with masscan"""
+  def scan(self, ip_list, port_list, bin_path, opts="-sS -Pn -n --wait 0 --max-rate 5000"):
+    """Executes masscan on given IPs/ports"""
+    bin_path = bin_path
+    opts_list = opts.split(' ')
     port_list = ','.join([str(p) for p in port_list])
     ip_list = ','.join([str(ip) for ip in ip_list])
-    process_list = [self.bin_path]
-    process_list.extend(self.opts_list)
+    process_list = [bin_path]
+    process_list.extend(opts_list)
     process_list.extend(['-oJ', '-', '-p'])
     process_list.append(port_list)
     process_list.append(ip_list)
@@ -30,29 +26,27 @@ class MasScan:
     result = parser.loads(out)
     return result
 
-def scan(items):
-  gi = GeoIP.open(cnf.get("geoip_dat", "/usr/share/GeoIP/GeoIP.dat"), GeoIP.GEOIP_INDEX_CACHE | GeoIP.GEOIP_CHECK_CACHE)
-  logger.debug("Starting scan")
-  ms = MasScan()
-  hosts = ms.scan(ip_list=[i['data']['ip'] for i in items], 
-                  port_list=cnf.get("tasks").get('ftp_scan').get("ports"))
-  logger.debug(hosts)
-  for h in hosts:
-    for port in h['ports']:
-      host = {
-        'ip': h['ip'],
-        'port': port['port'],
-        'data': {
-          'geo': {
-            'country': None,
-            'city': None
-          }
-        }
-      }
-    geodata = gi.record_by_name(host['ip'])
-    if geodata:
-      if 'country_code3' in geodata and geodata['country_code3']:
-        host['data']['geo']['country'] = geodata['country_code3']
-      if 'city' in geodata and geodata['city']:
-        host['data']['geo']['city'] = geodata['city']
-    logger.debug("Found %s:%s", host['ip'], host['port'])
+  def _run(self, items):
+    ip_list = [i['data']['ip'] for i in items]
+    port_list = self.lcnf.get("ports")
+
+    self._logger.debug("Starting scan, port_list=%s", port_list)
+
+    hosts = self.scan(ip_list=ip_list,
+                      port_list=port_list,
+                      bin_path=self.lcnf.get('bin_path', "/usr/bin/masscan"))
+
+    self._logger.debug(hosts)
+    hosts = {h['ip']: h for h in hosts}
+    for item in items:
+      if hosts.get(item['data']['ip']):
+        ports = [p['port'] for p in hosts[item['data']['ip']]['ports']]
+        if 'ports' in item['data']:
+          item['data']['ports'].extend(ports)
+        else:
+          item['data']['ports'] = ports
+        item['steps'][self._id] = True
+        self._logger.debug("Found %s with open ports %s", item['data']['ip'], ports)
+      else:
+        item['steps'][self._id] = False
+    return items

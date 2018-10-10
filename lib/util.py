@@ -1,9 +1,9 @@
 import logging
 
-from Config import cnf as config
-
 import importlib
 import sys, os
+
+from Config import cnf as config
 
 class Logger(logging.Logger):
   """Logger. standard logging logger with some shitcode on the top"""
@@ -74,8 +74,8 @@ class Logger(logging.Logger):
 class Loadable:
   """parent for loadable from configuration"""
   def __init__(self, id, root=config):
-    self.cnf = config
-    self.lcnf = root[id]
+    self.cnf = config # global config
+    self.lcnf = root[id] # local config
     self._id = id
 
 
@@ -93,8 +93,11 @@ class Loader:
     self._logger.debug('load %s', name)
     result = importlib.import_module(self._path)
     return getattr(result, name)
-  
+
   @classmethod
-  def by_id(cls, section, id):
-    l = cls(config[section][id].get('package'))
-    return l.get(config[section][id].get('service'))(id=id, root=config[section])
+  def by_id(cls, section, id) -> Loadable:
+    """Returns instantiated object of class provided in configuration"""
+    # prepares Loader for certain package
+    loader = cls(config.get(section).get(id).get('package'))
+    # loads class from this package and returns instantiated object of this class
+    return loader.get(config.get(section).get(id).get('service'))(id=id, root=config.get(section))
