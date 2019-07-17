@@ -7,7 +7,7 @@ basenc:
 	docker build -t medved_base . --no-cache
 
 up:
-	docker-compose up
+	docker-compose up --scale worker=$(workers)
 
 upd:
 	docker-compose up -d

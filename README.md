@@ -1,9 +1,7 @@
-# medved
-alpha beta whatever 
-partly works
+# Medved
+This is extensible network scanner (Masscan-based).
 
-
-## configuration
+## Configuration
 
 `data/config.yaml`
 ```
@@ -140,13 +138,19 @@ logging:
   Storage: DEBUG
   Loader: DEBUG
 ```
-probably it can be launched with docker, however I didn't test it yet
 
-run `make base && docker-compose up --build --scale worker=5`
+## Requirements
+* `docker >=18.09`
+* `docker-composer >=1.24`
 
-or simply `python medved.py`
+## Building Docker image
 
-you'll need working redis and mongodb for default configuration
+Run `make base && docker-compose up --build --scale worker=5`
+
+## Running
+
+Run `make up workers=5`  
+This launches a scanner with 5 workers.
 
 ## top-level services
 

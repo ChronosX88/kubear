@@ -1,11 +1,11 @@
-FROM base/archlinux:latest
+FROM archlinux/base:latest
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen
 
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
 
-RUN pacman -Syy --noconfirm
+RUN pacman -Syu --noconfirm
 
 RUN pacman -S --noconfirm reflector && reflector --verbose -l 200 -p http --sort rate --save /etc/pacman.d/mirrorlist
 
@@ -20,3 +20,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 
 ADD docker/confd /etc/confd
+
+COPY ./GeoIPCity.dat /tmp/
+
+RUN mkdir -p /usr/share/GeoIP/ && mv /tmp/GeoIPCity.dat /usr/share/GeoIP/GeoIPCity.dat
