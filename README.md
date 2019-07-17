@@ -1,6 +1,19 @@
 # Medved
 This is extensible network scanner (Masscan-based).
 
+## Requirements
+* `docker >=18.09`
+* `docker-composer >=1.24`
+
+## Building Docker image
+
+Run `make base && docker-compose up --build --scale worker=5`
+
+## Running
+
+Run `make up workers=5`  
+This launches a scanner with 5 workers.
+
 ## Configuration
 
 `data/config.yaml`
@@ -138,19 +151,6 @@ logging:
   Storage: DEBUG
   Loader: DEBUG
 ```
-
-## Requirements
-* `docker >=18.09`
-* `docker-composer >=1.24`
-
-## Building Docker image
-
-Run `make base && docker-compose up --build --scale worker=5`
-
-## Running
-
-Run `make up workers=5`  
-This launches a scanner with 5 workers.
 
 ## top-level services
 
