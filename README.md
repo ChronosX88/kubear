@@ -3,7 +3,7 @@ This is extensible network scanner (Masscan-based).
 
 ## Requirements
 * `docker >=18.09`
-* `docker-composer >=1.24`
+* `docker-compose >=1.24`
 
 ## Building Docker image
 
