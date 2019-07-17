@@ -10,7 +10,7 @@ up:
 	docker-compose up --scale worker=$(workers)
 
 upd:
-	docker-compose up -d
+	docker-compose up -d --scale worker=$(workers)
 
 bup:
 	docker-compose up --build
